@@ -1,0 +1,6 @@
+{
+  "name": "hajji edu app",
+  "description": "تطبيق ذكي يتعرف على المؤسسات التعليمية عبر خريطة محملة مسبقاً وبحث جغرافي متقدم (الدولة، الولاية، المعتمدية) ويقوم بقفل الهاتف وتفعيل وضع التركيز الصارم تلقائياً عند الدخول لمنع التشتت وفتحه فور الخروج.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

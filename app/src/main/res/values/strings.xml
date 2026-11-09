@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">hajji edu app</string>
+    <string name="app_subtitle">حارس التركيز للمؤسسات التعليمية</string>
+    <string name="focus_active">وضع التركيز نشط</string>
+    <string name="device_locked">الهاتف مقفل للدراسة</string>
+    <string name="device_unlocked">تم فك قفل الهاتف</string>
+    <string name="service_notification_title">حارس التركيز قيد التشغيل</string>
+    <string name="service_notification_desc">يراقب الموقع الجغرافي للمؤسسات التعليمية لضمان تركيزك</string>
+</resources>
