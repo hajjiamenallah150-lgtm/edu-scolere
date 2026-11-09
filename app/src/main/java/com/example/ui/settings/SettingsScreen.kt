@@ -377,13 +377,13 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "حجب الوقت والساعة عن التلميذ",
+                            text = "حجب الساعة والوقت الفعلي تماماً عن التلميذ",
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp
                         )
                         Text(
-                            text = "إخفاء عداد الوقت وشريط الساعة لمنع تشتت التلميذ بمراقبة الوقت",
+                            text = "إخفاء شريط ساعة النظام في أعلى الهاتف، وحجب معرفة الساعة (مثل الساعة الثالثة أو غيرها) لمنع التلميذ من مراقبة الوقت أثناء الدراسة",
                             color = Color(0xFF94A3B8),
                             fontSize = 11.sp
                         )

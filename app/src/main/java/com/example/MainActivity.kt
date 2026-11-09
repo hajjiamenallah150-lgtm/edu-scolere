@@ -82,6 +82,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.model.EducationalInstitution
 import com.example.service.FocusManager
 import com.example.service.SchoolZoneMonitorService
@@ -115,14 +118,39 @@ enum class MainTab(
 
 class MainActivity : ComponentActivity() {
 
+    private val focusManager = FocusManager.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
+            val userSettings by focusManager.userSettings.collectAsState()
+
+            LaunchedEffect(userSettings.hideTimeForStudent) {
+                applyStatusClockVisibility(userSettings.hideTimeForStudent)
+            }
+
             MyApplicationTheme(darkTheme = true) {
                 MainAppScreen()
             }
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            applyStatusClockVisibility(focusManager.userSettings.value.hideTimeForStudent)
+        }
+    }
+
+    private fun applyStatusClockVisibility(hideClock: Boolean) {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        if (hideClock) {
+            insetsController.hide(WindowInsetsCompat.Type.statusBars())
+            insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else {
+            insetsController.show(WindowInsetsCompat.Type.statusBars())
         }
     }
 }

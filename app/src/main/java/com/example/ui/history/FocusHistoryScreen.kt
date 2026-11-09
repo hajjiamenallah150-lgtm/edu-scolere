@@ -56,6 +56,7 @@ fun FocusHistoryScreen(
 
     val sessions by repository.sessions.collectAsState()
     val focusState by focusManager.focusState.collectAsState()
+    val userSettings by focusManager.userSettings.collectAsState()
 
     val totalHours = (focusState.totalFocusMinutesToday / 60)
     val remainingMinutes = (focusState.totalFocusMinutesToday % 60)
@@ -234,7 +235,16 @@ fun FocusHistoryScreen(
                                     fontSize = 13.sp
                                 )
                                 Text(
-                                    text = sess.dateFormatted,
+                                    text = if (userSettings.hideTimeForStudent) {
+                                        // Hide clock hours (e.g. "15:00 - 2026/11/06" -> "بتاريخ: 2026/11/06")
+                                        if (sess.dateFormatted.contains(" - ")) {
+                                            "بتاريخ: " + sess.dateFormatted.substringAfter(" - ")
+                                        } else {
+                                            sess.dateFormatted
+                                        }
+                                    } else {
+                                        sess.dateFormatted
+                                    },
                                     color = Color(0xFF94A3B8),
                                     fontSize = 11.sp
                                 )

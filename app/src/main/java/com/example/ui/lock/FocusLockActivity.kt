@@ -118,13 +118,18 @@ class FocusLockActivity : ComponentActivity() {
         window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
             WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            hide(WindowInsetsCompat.Type.systemBars())
-            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            val km = getSystemService(Context.KEYGUARD_SERVICE) as? android.app.KeyguardManager
+            km?.requestDismissKeyguard(this, null)
         }
+
+        hideSystemBars()
 
         val filter = IntentFilter(FocusManager.ACTION_ZONE_UNLOCKED)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -152,6 +157,36 @@ class FocusLockActivity : ComponentActivity() {
                     }
                 )
             }
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            hideSystemBars()
+        } else if (focusManager.focusState.value.isInsideZone) {
+            try {
+                @Suppress("DEPRECATION")
+                val closeDialogs = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                sendBroadcast(closeDialogs)
+            } catch (_: Exception) {}
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (focusManager.focusState.value.isInsideZone) {
+            val intent = Intent(this, FocusLockActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+            startActivity(intent)
+        }
+    }
+
+    private fun hideSystemBars() {
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 
@@ -287,9 +322,9 @@ fun FocusLockScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "الهاتف مقفل للدراسة",
+                        text = if (userSettings.hideTimeForStudent) "الهاتف مقفل • الساعة محجوبة" else "الهاتف مقفل للدراسة",
                         color = Color.White,
-                        fontSize = 26.sp,
+                        fontSize = 25.sp,
                         fontWeight = FontWeight.ExtraBold,
                         textAlign = TextAlign.Center
                     )
@@ -297,9 +332,9 @@ fun FocusLockScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = "تم كتم الإشعارات والمشتتات لضمان أعلى درجات الانتباه",
+                        text = if (userSettings.hideTimeForStudent) "تم حجب الساعة الفعلية وشريط الوقت بالكامل لضمان عدم مراقبة التلميذ للوقت" else "تم كتم الإشعارات والمشتتات لضمان أعلى درجات الانتباه",
                         color = Color(0xFF94A3B8),
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -333,26 +368,27 @@ fun FocusLockScreen(
                             if (userSettings.hideTimeForStudent) {
                                 Icon(
                                     imageVector = Icons.Default.VisibilityOff,
-                                    contentDescription = "الوقت محجوب",
+                                    contentDescription = "الساعة الفعلية محجوبة",
                                     tint = FocusEmerald,
-                                    modifier = Modifier.size(34.dp)
+                                    modifier = Modifier.size(36.dp)
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "الوقت محجوب",
+                                    text = "الساعة محجوبة",
                                     color = Color.White,
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.Black
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "التركيز على الدرس",
+                                    text = "الوقت الفعلي غير معروض",
                                     color = Color(0xFFCBD5E1),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium
                                 )
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "مراقبة الساعة معطلة",
+                                    text = "ممنوع مراقبة الساعة أثناء الحصة",
                                     color = FocusEmerald,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold
